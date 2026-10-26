@@ -64,6 +64,15 @@ export async function launch({ colorScheme = 'light', viewport = { width: 1440, 
   if (!sw) sw = await context.waitForEvent('serviceworker');
   const extensionId = new URL(sw.url()).host;
 
+  // Let first-run setup (onInstalled writes defaults) finish before tests
+  // seed their own state, or the defaults could land on top of it.
+  for (let i = 0; i < 100; i++) {
+    const keys = await sw.evaluate(() => chrome.storage.local.get(null).then(Object.keys));
+    if (keys.includes('embeds')) break;
+    await new Promise((r) => setTimeout(r, 50));
+  }
+  await new Promise((r) => setTimeout(r, 150));
+
   const site = (host, p = '/') => `http://${host}:${port}${p}`;
   const ext = (p) => `chrome-extension://${extensionId}/src/pages/${p}`;
 

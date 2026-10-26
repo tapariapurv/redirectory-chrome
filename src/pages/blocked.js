@@ -15,7 +15,7 @@ const host = displayHost(targetUrl) || 'this site';
 const COPY = [
   ['Is this on purpose?', `You reached for <strong>${esc(host)}</strong>. Your list is right there — knock out one small thing first.`],
   ['Hold on a second.', `<strong>${esc(host)}</strong> will still be there in an hour. Will the focus you have right now?`],
-  ['Not right now.', `You blocked <strong>${esc(host)}</strong> for a reason. Pick one task on the right and start it.`],
+  ['Not right now.', `You blocked <strong>${esc(host)}</strong> for a reason. Pick one task from your list and start it.`],
   ['Pause. Breathe.', `Opening <strong>${esc(host)}</strong> was probably a reflex. What did you actually sit down to do?`],
 ];
 
@@ -39,6 +39,12 @@ let selectedMinutes;
 let countdownDone = false;
 
 async function init() {
+  // This page is web-accessible (redirects land here), so a website could try
+  // to frame it and clickjack "Continue". Refuse to render inside a frame.
+  if (window.top !== window) {
+    document.body.replaceChildren();
+    return;
+  }
   state = await getState();
   document.title = `${host} is blocked · Redirectory`;
   $('brand').innerHTML = BRAND_MARK + '<span>Redirectory</span>';
@@ -181,6 +187,7 @@ function startCountdown(seconds) {
     updateButton();
     return;
   }
+  $('continue-label').textContent = `Continue in ${total}s`; // before the first frame, too
   // Only counts down while this tab is visible: switching away doesn't skip the pause.
   let remaining = total * 1000;
   let last = performance.now();
@@ -294,7 +301,6 @@ function renderPanel() {
   body.querySelector('.empty-panel')?.remove();
 
   const active = embeds.find((e) => e.id === state.activeEmbedId) || embeds[0];
-  tabs.hidden = embeds.length < 2 && active.provider === 'tasks';
   tabs.replaceChildren(
     ...embeds.map((e) => {
       const p = getProvider(e.provider);
@@ -330,7 +336,7 @@ function renderPanel() {
   const reload = $('reload-embed');
   ext.innerHTML = icon('external').outerHTML;
   reload.innerHTML = icon('refresh').outerHTML;
-  $('panel-settings').innerHTML = icon('settings').outerHTML;
+  $('panel-settings').replaceChildren(icon(embeds.length > 1 ? 'settings' : 'plus'), embeds.length > 1 ? 'Edit' : 'Add app');
   const isFrame = active.provider !== 'tasks' && active.url;
   ext.hidden = reload.hidden = !isFrame;
   if (isFrame) ext.href = active.url;

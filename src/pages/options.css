@@ -215,6 +215,7 @@ code {
 .preset-card {
   position: relative;
   display: grid;
+  align-content: start;
   gap: 4px;
   padding: 14px 14px 13px;
   border: 0;
@@ -258,7 +259,8 @@ code {
   font-size: 12.5px;
 }
 .preset-card .sites-preview {
-  margin-top: 8px;
+  margin-top: 6px;
+  max-height: calc(2 * 1.4em);
   color: var(--muted);
   font-size: 11.5px;
   line-height: 1.4;
@@ -276,7 +278,31 @@ code {
   color: var(--accent-ink);
 }
 .preset-card .state {
-  font-size: 11px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 11.5px;
+  font-weight: 600;
+}
+.preset-card .check {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  box-shadow: inset 0 0 0 1.5px var(--border-strong);
+  color: transparent;
+}
+.preset-card .check svg {
+  width: 12px;
+  height: 12px;
+  stroke-width: 3.5;
+}
+.preset-card.on .check {
+  background: var(--accent);
+  box-shadow: none;
+  color: var(--accent-ink);
 }
 
 /* Site list */
@@ -719,4 +745,8 @@ code {
   .chips {
     justify-content: flex-start;
   }
+}
+
+.preset-card.partial .check {
+  box-shadow: inset 0 0 0 2px var(--accent);
 }

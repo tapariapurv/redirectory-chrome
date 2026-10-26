@@ -290,6 +290,10 @@ test('focus panel: a site that refuses framing loads inside the block page', asy
   assert.equal(await frame.locator('#marker').textContent(), 'EMBED_OK /framed');
 
   // Navigating inside the embed (sign-in redirects etc.) keeps working.
+  // Like a person, wait for the loader to clear and the panel's slide-in to
+  // finish: Playwright checks stability inside the frame, not the frame itself.
+  await page.locator('.view:not([hidden]) .loading.done').waitFor();
+  await page.waitForFunction(() => document.getAnimations().every((a) => a.playState !== 'running' || a.effect.getTiming().iterations === Infinity));
   await frame.locator('#next').click();
   await frame.locator('#marker', { hasText: '/framed-next' }).waitFor({ timeout: 5000 });
 
@@ -317,6 +321,17 @@ test('header stripping is scoped: regular websites still cannot frame protected 
   const child = embedder.frames().find((f) => f !== embedder.mainFrame());
   const text = child ? await child.evaluate(() => document.body?.innerText || '').catch(() => '') : '';
   assert.ok(!text.includes('EMBED_OK'), 'framing still blocked for normal sites');
+});
+
+test('block page refuses to render when a website frames it (clickjacking)', async () => {
+  await block('distract.test');
+  const src = h.ext('blocked.html') + '#' + h.site('distract.test');
+  const page = await visit(h.site('attacker.test', '/embedder?src=' + encodeURIComponent(src)));
+  await page.waitForTimeout(800);
+  const child = page.frames().find((f) => f !== page.mainFrame());
+  assert.ok(child, 'frame exists');
+  const buttons = await child.evaluate(() => document.querySelectorAll('button').length).catch(() => 0);
+  assert.equal(buttons, 0, 'nothing clickable inside the frame');
 });
 
 test('quick tasks: add, complete, edit, persist', async () => {

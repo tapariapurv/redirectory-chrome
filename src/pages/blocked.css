@@ -289,7 +289,12 @@ h1 {
 }
 .panel-tools {
   display: flex;
+  align-items: center;
   gap: 2px;
+}
+.add-app svg {
+  width: 14px;
+  height: 14px;
 }
 
 .panel-body {

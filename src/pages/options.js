@@ -129,11 +129,12 @@ function renderPresets() {
           'div',
           { class: 'top' },
           h('span', { class: 'pi' }, icon(p.icon)),
-          st === 'on'
-            ? h('span', { class: 'tag accent state' }, 'On')
-            : st === 'partial'
-              ? h('span', { class: 'tag state' }, 'Partly on')
-              : h('label', { class: 'switch', style: 'pointer-events:none' }, h('input', { type: 'checkbox', tabindex: '-1' }), h('span'))
+          h(
+            'span',
+            { class: 'state' },
+            st === 'partial' ? `${p.sites.filter((x) => state.sites.some((s) => s.pattern === x)).length} of ${p.sites.length}` : '',
+            h('span', { class: 'check' }, icon('check'))
+          )
         ),
         h('span', { class: 'name' }, p.name),
         h('span', { class: 'blurb' }, p.blurb),
