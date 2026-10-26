@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirectory settings</title>
+    <link rel="icon" href="../assets/icons/icon-32.png" />
+    <link rel="stylesheet" href="../styles/base.css" />
+    <link rel="stylesheet" href="options.css" />
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="nav">
+        <span class="brand" id="brand"></span>
+        <nav id="nav">
+          <a href="#blocklist" data-icon="ban">Blocklist</a>
+          <a href="#focus" data-icon="layout">Focus panel</a>
+          <a href="#friction" data-icon="sliders">Friction</a>
+          <a href="#insights" data-icon="chart">Insights</a>
+          <a href="#data" data-icon="download">Backup</a>
+        </nav>
+        <div class="nav-status" id="nav-status"></div>
+      </aside>
+
+      <main class="content">
+        <section class="welcome" id="welcome" hidden>
+          <div>
+            <h1>Welcome to Redirectory</h1>
+            <p>
+              Pick the sites that pull you off course. Next time you open one, you’ll land on your task list instead —
+              with a way through if you genuinely need it.
+            </p>
+            <ol class="steps">
+              <li><b>Block</b> a few sites or a quick list below.</li>
+              <li><b>Choose</b> what shows in your focus panel — Notion, Todoist, or built-in tasks.</li>
+              <li><b>Pin</b> Redirectory to your toolbar to block any site in one click.</li>
+            </ol>
+          </div>
+          <button class="icon-btn" id="welcome-close" aria-label="Dismiss"></button>
+        </section>
+
+        <!-- Blocklist -->
+        <section class="card" id="blocklist">
+          <header class="card-head">
+            <div>
+              <h2>Blocklist</h2>
+              <p>Sites are blocked including all their subdomains. Add a path to block just part of a site, like <code>reddit.com/r/all</code>.</p>
+            </div>
+          </header>
+
+          <form class="field-row" id="add-form" autocomplete="off">
+            <input class="input" id="add-input" placeholder="youtube.com, x.com, reddit.com/r/popular…" aria-label="Sites to block" />
+            <button class="btn btn-primary" type="submit" id="add-btn">Block</button>
+          </form>
+          <p class="help">Paste as many as you like, separated by commas, spaces or new lines.</p>
+
+          <h3 class="sub">Quick lists</h3>
+          <div class="preset-grid" id="presets"></div>
+
+          <div class="list-head">
+            <h3 class="sub">Your list <span class="count" id="count"></span></h3>
+            <div class="list-tools">
+              <label class="search">
+                <span id="search-icon"></span>
+                <input id="search" placeholder="Filter" aria-label="Filter sites" />
+              </label>
+              <button class="btn btn-quiet btn-sm" id="clear-all" type="button">Clear all</button>
+            </div>
+          </div>
+          <ul class="site-list" id="sites" role="list"></ul>
+        </section>
+
+        <!-- Focus panel -->
+        <section class="card" id="focus">
+          <header class="card-head">
+            <div>
+              <h2>Focus panel</h2>
+              <p>What you see next to the “continue” button. Add your task app so the thing you should be doing is one click away.</p>
+            </div>
+            <a class="btn btn-ghost btn-sm" id="preview-btn" target="_blank"></a>
+          </header>
+
+          <ul class="embed-list" id="embeds" role="list"></ul>
+
+          <h3 class="sub">Add a panel</h3>
+          <div class="provider-grid" id="providers"></div>
+
+          <form class="embed-form" id="embed-form" hidden autocomplete="off">
+            <div class="embed-form-head">
+              <span id="embed-form-badge"></span>
+              <div>
+                <div class="embed-form-title" id="embed-form-title"></div>
+                <div class="help" id="embed-form-hint"></div>
+              </div>
+            </div>
+            <div class="embed-fields">
+              <label class="field">
+                <span>Name</span>
+                <input class="input" id="embed-label" maxlength="40" />
+              </label>
+              <label class="field grow" id="embed-url-field">
+                <span>Link</span>
+                <input class="input" id="embed-url" />
+              </label>
+            </div>
+            <div class="embed-form-actions">
+              <button class="btn btn-quiet" type="button" id="embed-cancel">Cancel</button>
+              <button class="btn btn-primary" type="submit">Add to panel</button>
+            </div>
+          </form>
+
+          <div class="note">
+            <span id="note-icon"></span>
+            <div>
+              <b>Sign in first.</b> Embedded apps use your normal browser session, so log in to Notion, Todoist etc. in a regular tab once.
+              Redirectory lets these apps load inside its own page only — it never changes how they behave anywhere else.
+            </div>
+          </div>
+        </section>
+
+        <!-- Friction -->
+        <section class="card" id="friction">
+          <header class="card-head">
+            <div>
+              <h2>Friction</h2>
+              <p>How hard it is to get past the block. A little friction goes a long way.</p>
+            </div>
+          </header>
+
+          <div class="setting">
+            <div>
+              <div class="setting-title">Blocking</div>
+              <div class="setting-desc">Master switch. Prefer “Pause” in the toolbar popup — it turns itself back on.</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="enabled" /><span></span></label>
+          </div>
+
+          <div class="setting">
+            <div>
+              <div class="setting-title">Pause before continuing</div>
+              <div class="setting-desc">The continue button unlocks after this countdown. It only counts while the tab is in view.</div>
+            </div>
+            <div class="segmented" id="wait"></div>
+          </div>
+
+          <div class="setting">
+            <div>
+              <div class="setting-title">Ask what it’s for</div>
+              <div class="setting-desc">Require a short reason before continuing. Naming it is often enough to drop it.</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="require-reason" /><span></span></label>
+          </div>
+
+          <div class="setting">
+            <div>
+              <div class="setting-title">Time limits on offer</div>
+              <div class="setting-desc">Choose up to four. The shortest is pre-selected — a nudge toward less.</div>
+            </div>
+            <div class="chips" id="durations"></div>
+          </div>
+
+          <div class="setting">
+            <div>
+              <div class="setting-title">Close the door when time’s up</div>
+              <div class="setting-desc">When your allowed minutes run out, open tabs on that site go back to the block page.</div>
+            </div>
+            <label class="switch"><input type="checkbox" id="reblock" /><span></span></label>
+          </div>
+        </section>
+
+        <!-- Insights -->
+        <section class="card" id="insights">
+          <header class="card-head">
+            <div>
+              <h2>Insights</h2>
+              <p>Last 14 days. Everything stays on this device.</p>
+            </div>
+          </header>
+          <div class="kpis" id="kpis"></div>
+          <div class="chart" id="chart"></div>
+          <div class="legend">
+            <span><i class="sw sw-back"></i>Turned back</span>
+            <span><i class="sw sw-cont"></i>Continued</span>
+          </div>
+        </section>
+
+        <!-- Data -->
+        <section class="card" id="data">
+          <header class="card-head">
+            <div>
+              <h2>Backup</h2>
+              <p>Export your list and settings to move them to another browser.</p>
+            </div>
+          </header>
+          <div class="btn-row">
+            <button class="btn btn-ghost" id="export-btn" type="button"></button>
+            <label class="btn btn-ghost" id="import-label">
+              <input type="file" id="import-file" accept="application/json,.json" hidden />
+            </label>
+            <span class="grow"></span>
+            <button class="btn btn-quiet" id="reset-btn" type="button">Reset everything</button>
+          </div>
+        </section>
+
+        <footer class="page-foot">Redirectory · made to get you back to the work that matters</footer>
+      </main>
+    </div>
+    <script type="module" src="options.js"></script>
+  </body>
+</html>

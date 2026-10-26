@@ -1,0 +1,160 @@
+.tasks {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  padding: 28px 32px 20px;
+  overflow-y: auto;
+}
+.tasks-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+.tasks-title {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 720;
+  letter-spacing: -0.03em;
+}
+.tasks-count {
+  display: block;
+  margin-top: 2px;
+  color: var(--muted);
+  font-size: 13px;
+}
+.tasks-form {
+  position: relative;
+  margin-bottom: 8px;
+}
+.tasks-plus {
+  position: absolute;
+  left: 13px;
+  top: 50%;
+  display: grid;
+  color: var(--accent);
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+.tasks-plus svg {
+  width: 18px;
+  height: 18px;
+}
+.tasks-input {
+  height: 46px;
+  padding-left: 40px;
+  border-radius: 12px;
+  background: var(--surface-2);
+  border-color: transparent;
+  font-size: 15px;
+}
+.tasks-input:focus {
+  background: var(--surface);
+}
+
+.tasks-list {
+  margin: 4px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.task {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-height: 46px;
+  padding: 6px 4px 6px 6px;
+  border-bottom: 1px solid var(--border);
+  animation: task-in 0.25s var(--ease);
+}
+.task:last-child {
+  border-bottom: 0;
+}
+.task-check {
+  display: grid;
+  place-items: center;
+  flex: none;
+  width: 22px;
+  height: 22px;
+  padding: 0;
+  border: 1.8px solid var(--border-strong);
+  border-radius: 50%;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  transition: background 0.2s var(--ease), border-color 0.2s, color 0.2s, transform 0.15s;
+}
+.task-check:hover {
+  border-color: var(--good);
+  color: var(--good);
+}
+.task-check svg {
+  width: 13px;
+  height: 13px;
+  stroke-width: 3;
+}
+.task.done .task-check {
+  background: var(--good);
+  border-color: var(--good);
+  color: #fff;
+  transform: scale(1);
+  animation: pop 0.3s var(--ease);
+}
+.task-text {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  overflow-wrap: anywhere;
+  cursor: text;
+}
+.task.done .task-text {
+  color: var(--muted);
+  text-decoration: line-through;
+  text-decoration-color: var(--border-strong);
+}
+.task-edit {
+  flex: 1;
+  height: 32px;
+  padding: 0 8px;
+  margin: 0 -9px;
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  background: var(--surface);
+  font-size: 15px;
+  outline: none;
+  box-shadow: var(--focus);
+}
+.task-del {
+  opacity: 0;
+}
+.task:hover .task-del,
+.task-del:focus-visible {
+  opacity: 1;
+}
+
+.tasks-empty {
+  margin: 40px auto 0;
+  max-width: 300px;
+  text-align: center;
+}
+.tasks-empty-title {
+  font-weight: 650;
+  font-size: 15px;
+}
+.tasks-empty-sub {
+  margin-top: 6px;
+  color: var(--muted);
+  font-size: 13.5px;
+}
+
+@keyframes task-in {
+  from {
+    opacity: 0;
+    transform: translateY(-4px);
+  }
+}
+@keyframes pop {
+  50% {
+    transform: scale(1.18);
+  }
+}

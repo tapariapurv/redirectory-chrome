@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Redirectory</title>
+    <link rel="stylesheet" href="../styles/base.css" />
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <header class="pop-head">
+      <span class="brand" id="brand"></span>
+      <button class="btn btn-ghost btn-sm" id="pause-btn" type="button"></button>
+    </header>
+
+    <div class="pause-bar" id="pause-bar" hidden>
+      <span class="pause-label">Pause blocking for</span>
+      <div class="pause-options" id="pause-options"></div>
+    </div>
+
+    <div class="status-banner" id="status-banner" hidden></div>
+
+    <main class="pop-main">
+      <section class="current" id="current"></section>
+
+      <form class="add-form" id="add-form" autocomplete="off">
+        <input class="input" id="add-input" placeholder="Add a site — youtube.com, reddit.com/r/all" aria-label="Site to block" />
+        <button class="btn btn-primary add-btn" type="submit" aria-label="Add site" id="add-btn"></button>
+      </form>
+
+      <section>
+        <div class="section-head">
+          <h2>Quick lists</h2>
+        </div>
+        <div class="presets" id="presets"></div>
+      </section>
+
+      <section>
+        <div class="section-head">
+          <h2>Blocked <span class="count" id="count"></span></h2>
+          <a class="link" href="options.html" target="_blank">Manage</a>
+        </div>
+        <ul class="sites" id="sites" role="list"></ul>
+      </section>
+    </main>
+
+    <footer class="pop-foot">
+      <a class="foot-link" href="options.html#focus" target="_blank" id="focus-link"></a>
+      <a class="foot-link" href="options.html" target="_blank" id="settings-link"></a>
+    </footer>
+    <script type="module" src="popup.js"></script>
+  </body>
+</html>
