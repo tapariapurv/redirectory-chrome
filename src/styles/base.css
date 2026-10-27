@@ -1,63 +1,151 @@
 /* Redirectory design tokens + shared components. */
 
-:root {
-  color-scheme: light dark;
-  --font: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable Text', 'Segoe UI',
-    Inter, Roboto, 'Helvetica Neue', Arial, sans-serif;
-  --font-display: ui-sans-serif, -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI Variable Display',
-    'Segoe UI', Inter, Roboto, 'Helvetica Neue', Arial, sans-serif;
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 100 900;
+  font-display: swap;
+  src: url('../assets/fonts/inter.woff2') format('woff2');
+}
 
-  --bg: #f6f4f0;
-  --bg-tint: #f1ede6;
-  --surface: #ffffff;
-  --surface-2: #f3f0eb;
-  --surface-3: #ebe7e0;
-  --border: rgba(28, 24, 18, 0.09);
-  --border-strong: rgba(28, 24, 18, 0.16);
-  --text: #18171b;
-  --text-2: #4a4750;
-  --muted: #7a7680;
-  --accent: #ec5a32;
-  --accent-hover: #d94c26;
-  --accent-soft: rgba(236, 90, 50, 0.1);
-  --accent-ink: #ffffff;
-  --good: #1f9d6c;
-  --good-soft: rgba(31, 157, 108, 0.12);
-  --warn: #c98a12;
-  --danger: #d13b3b;
-  --shadow-sm: 0 1px 2px rgba(28, 24, 18, 0.06);
-  --shadow: 0 1px 2px rgba(28, 24, 18, 0.05), 0 8px 24px -8px rgba(28, 24, 18, 0.12);
-  --shadow-lg: 0 2px 4px rgba(28, 24, 18, 0.04), 0 24px 60px -12px rgba(28, 24, 18, 0.22);
-  --focus: 0 0 0 3px rgba(236, 90, 50, 0.28);
+/*
+ * Theming: html[data-theme] picks a palette, html[data-mode] picks light/dark
+ * (theme-boot.js sets both before first paint). A theme only defines a
+ * background and an accent; every surface is mixed from those, so all themes
+ * stay consistent in both modes.
+ */
+:root {
+  --font: 'Inter', ui-sans-serif, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+    sans-serif;
+  --font-display: var(--font);
+  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+  --spring: cubic-bezier(0.34, 1.4, 0.64, 1);
   --radius-sm: 8px;
   --radius: 12px;
   --radius-lg: 18px;
-  --ease: cubic-bezier(0.2, 0.8, 0.2, 1);
+
+  color-scheme: light;
+  /* light defaults (Ember) */
+  --bg: #f6f4f0;
+  --accent: #e8552c;
+  --accent-hover: #d4461f;
+  --accent-ink: #ffffff;
+  --ink: #18171b;
+
+  --text: var(--ink);
+  --text-2: color-mix(in oklab, var(--ink) 74%, var(--bg));
+  --muted: color-mix(in oklab, var(--ink) 54%, var(--bg));
+  --surface: #ffffff;
+  --bg-tint: color-mix(in oklab, var(--bg), var(--ink) 2.5%);
+  --surface-2: color-mix(in oklab, var(--bg), var(--ink) 4%);
+  --surface-3: color-mix(in oklab, var(--bg), var(--ink) 8.5%);
+  --border: color-mix(in oklab, var(--ink) 9%, transparent);
+  --border-strong: color-mix(in oklab, var(--ink) 16%, transparent);
+  --accent-soft: color-mix(in oklab, var(--accent) 11%, transparent);
+  --focus: 0 0 0 3px color-mix(in oklab, var(--accent) 30%, transparent);
+  --good: #1f9d6c;
+  --good-soft: rgba(31, 157, 108, 0.12);
+  --danger: #d13b3b;
+  --shadow-sm: 0 1px 2px rgba(20, 18, 15, 0.06);
+  --shadow: 0 1px 2px rgba(20, 18, 15, 0.05), 0 8px 24px -8px rgba(20, 18, 15, 0.12);
+  --shadow-lg: 0 2px 4px rgba(20, 18, 15, 0.04), 0 24px 60px -12px rgba(20, 18, 15, 0.2);
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #0e0f12;
-    --bg-tint: #131418;
-    --surface: #17181c;
-    --surface-2: #1e1f24;
-    --surface-3: #26272d;
-    --border: rgba(255, 255, 255, 0.07);
-    --border-strong: rgba(255, 255, 255, 0.13);
-    --text: #f3f1ed;
-    --text-2: #c4c1c9;
-    --muted: #8d8a95;
-    --accent: #ff7149;
-    --accent-hover: #ff8662;
-    --accent-soft: rgba(255, 113, 73, 0.13);
-    --accent-ink: #1a0d08;
-    --good: #3ccf91;
-    --good-soft: rgba(60, 207, 145, 0.13);
-    --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
-    --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -10px rgba(0, 0, 0, 0.6);
-    --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 30px 70px -15px rgba(0, 0, 0, 0.7);
-    --focus: 0 0 0 3px rgba(255, 113, 73, 0.32);
-  }
+:root[data-mode='dark'] {
+  color-scheme: dark;
+  --bg: #0e0f12;
+  --accent: #ff7149;
+  --accent-hover: #ff8662;
+  --accent-ink: #1a0d08;
+  --ink: #f3f1ed;
+  --surface: color-mix(in oklab, var(--bg), #fff 4.5%);
+  --bg-tint: color-mix(in oklab, var(--bg), #fff 2.5%);
+  --surface-2: color-mix(in oklab, var(--bg), #fff 8%);
+  --surface-3: color-mix(in oklab, var(--bg), #fff 12.5%);
+  --good: #3ccf91;
+  --good-soft: rgba(60, 207, 145, 0.13);
+  --danger: #ef5b5b;
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.3), 0 10px 30px -10px rgba(0, 0, 0, 0.6);
+  --shadow-lg: 0 2px 4px rgba(0, 0, 0, 0.3), 0 30px 70px -15px rgba(0, 0, 0, 0.7);
+}
+
+/* ---------- Themes ---------- */
+
+:root[data-theme='ocean'] {
+  --bg: #f2f5f9;
+  --accent: #2463eb;
+  --accent-hover: #1d52c9;
+  --ink: #141a24;
+}
+:root[data-theme='ocean'][data-mode='dark'] {
+  --bg: #0b0f16;
+  --accent: #5b8cff;
+  --accent-hover: #7aa2ff;
+  --accent-ink: #06122b;
+  --ink: #eef2f8;
+}
+:root[data-theme='forest'] {
+  --bg: #f2f5f0;
+  --accent: #1a7f4e;
+  --accent-hover: #146b41;
+  --ink: #141a16;
+}
+:root[data-theme='forest'][data-mode='dark'] {
+  --bg: #0b100d;
+  --accent: #45d08e;
+  --accent-hover: #62dca2;
+  --accent-ink: #04170d;
+  --ink: #edf3ef;
+}
+:root[data-theme='grape'] {
+  --bg: #f6f4fa;
+  --accent: #7046e6;
+  --accent-hover: #5f37d1;
+  --ink: #19162a;
+}
+:root[data-theme='grape'][data-mode='dark'] {
+  --bg: #0f0d15;
+  --accent: #a48bff;
+  --accent-hover: #b8a4ff;
+  --accent-ink: #160b33;
+  --ink: #f1eff8;
+}
+:root[data-theme='rose'] {
+  --bg: #faf4f4;
+  --accent: #d92f5a;
+  --accent-hover: #c0244c;
+  --ink: #221518;
+}
+:root[data-theme='rose'][data-mode='dark'] {
+  --bg: #130d0f;
+  --accent: #ff6f8f;
+  --accent-hover: #ff8ba5;
+  --accent-ink: #2b0812;
+  --ink: #f8eff1;
+}
+:root[data-theme='mono'] {
+  --bg: #f5f5f4;
+  --accent: #1c1c1e;
+  --accent-hover: #000000;
+  --accent-ink: #ffffff;
+  --ink: #161617;
+}
+:root[data-theme='mono'][data-mode='dark'] {
+  --bg: #09090a;
+  --accent: #f4f4f5;
+  --accent-hover: #ffffff;
+  --accent-ink: #0a0a0b;
+  --ink: #f4f4f5;
+}
+
+/* Smooth cross-fade while switching theme or mode. */
+:root.theme-anim,
+:root.theme-anim *,
+:root.theme-anim *::before,
+:root.theme-anim *::after {
+  transition: background-color 0.35s var(--ease), color 0.35s var(--ease), border-color 0.35s var(--ease),
+    box-shadow 0.35s var(--ease), fill 0.35s, stroke 0.35s !important;
 }
 
 *,
@@ -476,4 +564,119 @@ textarea.input {
     animation-duration: 0.01ms !important;
     transition-duration: 0.01ms !important;
   }
+}
+
+/* ---------- Logos (brand marks, favicons, lettered tiles) ---------- */
+
+.logo {
+  --s: 28px;
+  position: relative;
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: var(--s);
+  height: var(--s);
+  border-radius: calc(var(--s) * 0.28);
+  background: var(--surface-2);
+  box-shadow: inset 0 0 0 1px var(--border);
+  overflow: hidden;
+  color: var(--text);
+}
+.logo.xs {
+  --s: 18px;
+}
+.logo.sm {
+  --s: 22px;
+}
+.logo.lg {
+  --s: 38px;
+}
+.logo.xl {
+  --s: 48px;
+}
+.logo > i {
+  width: 58%;
+  height: 58%;
+  background: var(--fg, currentColor);
+  -webkit-mask: var(--mark) center / contain no-repeat;
+  mask: var(--mark) center / contain no-repeat;
+}
+.logo.ink > i {
+  background: var(--text);
+}
+.logo.filled {
+  background: var(--bg);
+  box-shadow: none;
+}
+.logo.filled > i {
+  background: var(--fg);
+}
+.logo.is-img {
+  background: #fff;
+}
+:root[data-mode='dark'] .logo.is-img {
+  background: color-mix(in oklab, var(--surface-3), #fff 6%);
+}
+.logo > img {
+  width: 62%;
+  height: 62%;
+  object-fit: contain;
+}
+.logo.is-letter {
+  background: hsl(var(--hue) 70% 50% / 0.14);
+  box-shadow: inset 0 0 0 1px hsl(var(--hue) 60% 45% / 0.18);
+  color: hsl(var(--hue) 55% 40%);
+  font-weight: 700;
+  font-size: calc(var(--s) * 0.44);
+  letter-spacing: -0.02em;
+}
+:root[data-mode='dark'] .logo.is-letter {
+  color: hsl(var(--hue) 70% 72%);
+}
+.logo.is-app-tasks {
+  background: var(--accent);
+  box-shadow: none;
+  color: var(--accent-ink);
+}
+.logo.is-app-tasks svg {
+  width: 56%;
+  height: 56%;
+}
+.logo.is-globe svg {
+  width: 56%;
+  height: 56%;
+  color: var(--muted);
+}
+.logo.pop {
+  animation: logo-pop 0.35s var(--spring);
+}
+@keyframes logo-pop {
+  from {
+    transform: scale(0.7);
+    opacity: 0.4;
+  }
+}
+
+.logo-stack {
+  display: inline-flex;
+  align-items: center;
+}
+.logo-stack .logo {
+  box-shadow: 0 0 0 2px var(--surface), inset 0 0 0 1px var(--border);
+  transition: transform 0.2s var(--ease);
+}
+.logo-stack .logo + .logo {
+  margin-left: calc(var(--s) * -0.28);
+}
+
+/* ---------- View transitions (list changes, panel switches) ---------- */
+
+/* Clicks pass straight through the transition snapshot, so nothing is swallowed. */
+::view-transition {
+  pointer-events: none;
+}
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: 0.18s;
+  animation-timing-function: var(--ease);
 }

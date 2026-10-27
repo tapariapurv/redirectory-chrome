@@ -86,15 +86,7 @@ body {
   background: var(--surface);
   box-shadow: var(--shadow-sm), inset 0 0 0 1px var(--border);
 }
-.current .favicon {
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-}
-.current .favicon img {
-  width: 20px;
-  height: 20px;
-}
+
 .current-info {
   flex: 1;
   min-width: 0;
@@ -206,18 +198,17 @@ body {
 .preset:active {
   transform: scale(0.98);
 }
-.preset-icon {
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 8px;
-  background: var(--surface-2);
-  color: var(--text-2);
+.preset .logo-stack .logo {
+  box-shadow: 0 0 0 2px var(--surface), inset 0 0 0 1px var(--border);
 }
-.preset-icon svg {
-  width: 15px;
-  height: 15px;
+.preset.on .logo-stack .logo {
+  box-shadow: 0 0 0 2px color-mix(in oklab, var(--surface), var(--accent) 11%), inset 0 0 0 1px var(--border);
+}
+.preset:hover .logo-stack .logo:nth-child(2) {
+  transform: translateX(2px);
+}
+.preset:hover .logo-stack .logo:nth-child(3) {
+  transform: translateX(4px);
 }
 .preset-name {
   font-size: 12px;
@@ -245,10 +236,6 @@ body {
   background: var(--accent-soft);
   box-shadow: inset 0 0 0 1.5px var(--accent);
 }
-.preset.on .preset-icon {
-  background: var(--accent);
-  color: var(--accent-ink);
-}
 .preset.on .preset-check {
   background: var(--accent);
   box-shadow: none;
@@ -274,15 +261,6 @@ body {
 }
 .site:hover {
   background: var(--surface-2);
-}
-.site .favicon {
-  width: 24px;
-  height: 24px;
-  border-radius: 7px;
-}
-.site .favicon img {
-  width: 14px;
-  height: 14px;
 }
 .site-name {
   flex: 1;

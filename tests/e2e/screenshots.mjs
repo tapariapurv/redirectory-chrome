@@ -40,7 +40,7 @@ const seed = {
       [6, 8, 7, 1], [5, 11, 10, 1], [4, 6, 6, 0], [3, 9, 8, 1], [2, 5, 5, 0], [1, 7, 7, 0], [0, 6, 5, 1],
     ].map(([o, blocked, backed, continued]) => [day(o), { blocked, backed, continued }])
   ),
-  settings: { waitSeconds: 10, requireReason: false, durations: [5, 15, 30], reblockOnExpiry: true },
+  settings: { waitSeconds: 10, requireReason: false, durations: [5, 15, 30, 'day'], reblockOnExpiry: true },
 };
 
 for (const scheme of ['light', 'dark']) {

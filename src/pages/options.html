@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>Redirectory settings</title>
     <link rel="icon" href="../assets/icons/icon-32.png" />
+    <script src="../lib/theme-boot.js"></script>
     <link rel="stylesheet" href="../styles/base.css" />
     <link rel="stylesheet" href="options.css" />
   </head>
@@ -16,6 +17,7 @@
           <a href="#blocklist" data-icon="ban">Blocklist</a>
           <a href="#focus" data-icon="layout">Focus panel</a>
           <a href="#friction" data-icon="sliders">Friction</a>
+          <a href="#appearance" data-icon="palette">Appearance</a>
           <a href="#insights" data-icon="chart">Insights</a>
           <a href="#data" data-icon="download">Backup</a>
         </nav>
@@ -154,7 +156,7 @@
           <div class="setting">
             <div>
               <div class="setting-title">Time limits on offer</div>
-              <div class="setting-desc">Choose up to four. The shortest is pre-selected — a nudge toward less.</div>
+              <div class="setting-desc">Choose up to five. The shortest is pre-selected — a nudge toward less. “Rest of today” unblocks the site until midnight.</div>
             </div>
             <div class="chips" id="durations"></div>
           </div>
@@ -166,6 +168,18 @@
             </div>
             <label class="switch"><input type="checkbox" id="reblock" /><span></span></label>
           </div>
+        </section>
+
+        <!-- Appearance -->
+        <section class="card" id="appearance">
+          <header class="card-head">
+            <div>
+              <h2>Appearance</h2>
+              <p>Applies to the block page, the popup and this page.</p>
+            </div>
+            <div class="segmented" id="modes" role="group" aria-label="Light or dark"></div>
+          </header>
+          <div class="theme-grid" id="themes"></div>
         </section>
 
         <!-- Insights -->

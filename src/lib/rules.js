@@ -4,6 +4,7 @@
 
 import { splitPattern, escapeRegex } from './domains.js';
 import { embedDomain } from './embeds.js';
+import { endOfDay, DAY } from './store.js';
 
 export const FRAME_RULE_ID = 1;
 export const SITE_RULE_BASE = 100;
@@ -93,4 +94,10 @@ export function nextExpiry(state, now = Date.now()) {
   const times = Object.values(state.allowances || {}).filter((t) => t > now);
   if (state.pausedUntil > now) times.push(state.pausedUntil);
   return times.length ? Math.min(...times) : null;
+}
+
+/** When an allowance granted now should end: N minutes (1–240) or local midnight for 'day'. */
+export function allowanceEnd(minutes, now = Date.now()) {
+  if (minutes === DAY) return endOfDay(now);
+  return now + Math.max(1, Math.min(240, Number(minutes) || 15)) * 60_000;
 }

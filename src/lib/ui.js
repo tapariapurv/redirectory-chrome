@@ -49,6 +49,8 @@ export const ICONS = {
   download: svg('<path d="M12 4v12M6 10l6 6 6-6M4 20h16"/>'),
   upload: svg('<path d="M12 20V8M6 14l6-6 6 6M4 4h16"/>'),
   eye: svg('<path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/>'),
+  palette: svg('<path d="M12 3a9 9 0 1 0 0 18c1.1 0 1.8-.9 1.8-1.9 0-.5-.2-.9-.5-1.3-.3-.3-.5-.8-.5-1.3 0-1 .8-1.8 1.8-1.8H17a4 4 0 0 0 4-4C21 6.4 17 3 12 3Z"/><circle cx="7.5" cy="11.5" r="1"/><circle cx="10.5" cy="7.5" r="1"/><circle cx="15" cy="7.5" r="1"/>'),
+  globe: svg('<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.7 3.8 5.7 3.8 9s-1.3 6.3-3.8 9c-2.5-2.7-3.8-5.7-3.8-9S9.5 5.7 12 3Z"/>'),
   sparkle: svg('<path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5 18 18M6 18l2.5-2.5M15.5 8.5 18 6"/>'),
   // preset icons
   social: svg('<circle cx="9" cy="8" r="3.2"/><path d="M3.5 19c.8-3.2 3-5 5.5-5s4.7 1.8 5.5 5"/><circle cx="17" cy="9" r="2.4"/><path d="M16 14.2c2.4-.3 4 1.2 4.6 3.8"/>'),
@@ -71,27 +73,25 @@ export const BRAND_MARK = `<svg class="brand-mark" viewBox="0 0 64 64" aria-hidd
   <path d="m16 33 8 8 8-8" fill="none" stroke="#fff" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>`;
 
-/** Browser-cached favicon for a site (falls back to a generic globe). */
-export function faviconUrl(siteOrUrl, size = 32) {
-  const pageUrl = /^https?:/.test(siteOrUrl) ? siteOrUrl : 'https://' + siteOrUrl.split('/')[0];
-  const u = new URL(chrome.runtime.getURL('/_favicon/'));
-  u.searchParams.set('pageUrl', pageUrl);
-  u.searchParams.set('size', String(size));
-  return u.toString();
-}
-
-export function favicon(site, cls = 'favicon') {
-  return h('span', { class: cls }, h('img', { src: faviconUrl(site), alt: '', loading: 'lazy' }));
-}
-
-export function monogram(name, color, cls = 'monogram') {
-  const letters = String(name || '?')
-    .split(/\s+/)
-    .map((w) => w[0])
-    .join('')
-    .slice(0, 2)
-    .toUpperCase();
-  return h('span', { class: cls, style: `background:${color}` }, letters);
+/**
+ * Run a DOM update as a view transition (a soft cross-fade) where supported.
+ * Skipped when the user prefers reduced motion.
+ */
+let activeTransition = null;
+export function smooth(update) {
+  const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+  // Never queue transitions behind each other: fast clicks just update.
+  if (!document.startViewTransition || reduce || document.hidden || activeTransition) {
+    return Promise.resolve(update());
+  }
+  const t = document.startViewTransition(update);
+  activeTransition = t;
+  const done = () => {
+    if (activeTransition === t) activeTransition = null;
+  };
+  t.ready.catch(() => {});
+  t.finished.then(done, done);
+  return t.updateCallbackDone;
 }
 
 let toastTimer;

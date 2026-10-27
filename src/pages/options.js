@@ -1,15 +1,19 @@
-import { getState, set, onChange, uid, todayKey, DEFAULTS, DEFAULT_SETTINGS } from '../lib/store.js';
+import { getState, set, onChange, uid, todayKey, durationLabel, sortDurations, DAY, DEFAULTS, DEFAULT_SETTINGS } from '../lib/store.js';
 import { parsePatternList, splitPattern, normalizePattern } from '../lib/domains.js';
 import { isBlockingActive } from '../lib/rules.js';
 import { PRESETS, presetState, togglePreset } from '../lib/presets.js';
 import { PROVIDERS, getProvider, normalizeEmbedUrl, detectProvider } from '../lib/embeds.js';
 import { addPatterns, removePatterns } from '../lib/sites.js';
-import { h, icon, favicon, monogram, toast, formatTime, plural, BRAND_MARK } from '../lib/ui.js';
+import { h, icon, toast, formatTime, plural, BRAND_MARK } from '../lib/ui.js';
+import { initLogos, siteLogo, appLogo, logoStack } from '../lib/logos.js';
+import { THEMES, MODES, DEFAULT_APPEARANCE } from '../lib/themes.js';
 
 const $ = (id) => document.getElementById(id);
 const WAIT_OPTIONS = [0, 5, 10, 20, 30, 60];
-const DURATION_OPTIONS = [1, 5, 10, 15, 30, 60];
-const MAX_DURATIONS = 4;
+const DURATION_OPTIONS = [1, 5, 10, 15, 30, 60, DAY];
+const MAX_DURATIONS = 5;
+// Everything except the favicon cache (logos update themselves in place).
+const WATCHED = Object.keys(DEFAULTS).filter((k) => k !== 'favicons');
 
 let state;
 let filter = '';
@@ -26,10 +30,10 @@ async function init() {
   $('export-btn').append(icon('download'), 'Export');
   $('import-label').prepend(icon('upload'), 'Import');
 
-  state = await getState();
+  [state] = await Promise.all([getState(), initLogos()]);
   renderAll();
 
-  onChange(Object.keys(DEFAULTS), async () => {
+  onChange(WATCHED, async () => {
     state = await getState();
     renderAll();
   });
@@ -51,6 +55,7 @@ function renderAll() {
   renderEmbeds();
   renderProviders();
   renderFriction();
+  renderAppearance();
   renderInsights();
 }
 
@@ -128,7 +133,7 @@ function renderPresets() {
         h(
           'div',
           { class: 'top' },
-          h('span', { class: 'pi' }, icon(p.icon)),
+          logoStack(p.sites, { size: 'md', max: 5 }),
           h(
             'span',
             { class: 'state' },
@@ -161,7 +166,7 @@ function renderSites() {
       return h(
         'li',
         { class: 'site' },
-        favicon(host),
+        siteLogo(s.pattern),
         h('span', { class: 'site-name', title: s.pattern }, host, path ? h('span', { class: 'path' }, path) : null),
         h(
           'button',
@@ -197,7 +202,7 @@ function renderEmbeds() {
       return h(
         'li',
         { class: 'embed' },
-        monogram(e.label || p.name, p.color),
+        appLogo(e, { size: 'lg' }),
         h(
           'div',
           { class: 'embed-info' },
@@ -245,7 +250,7 @@ function renderProviders() {
           title: p.builtin && hasTasks ? 'Already in your panel' : '',
           onclick: () => openEmbedForm(p.id),
         },
-        monogram(p.name, p.color),
+        appLogo(p.id),
         p.name
       )
     )
@@ -262,7 +267,7 @@ function openEmbedForm(providerId) {
   renderProviders();
   const form = $('embed-form');
   form.hidden = false;
-  $('embed-form-badge').replaceChildren(monogram(p.name, p.color));
+  $('embed-form-badge').replaceChildren(appLogo(p.id, { size: 'lg' }));
   $('embed-form-title').textContent = p.id === 'custom' ? 'Add any website' : `Add ${p.name}`;
   $('embed-form-hint').textContent = p.hint || `Paste the ${p.name} link you want to see when you get redirected.`;
   $('embed-label').value = p.id === 'custom' ? '' : p.name;
@@ -339,7 +344,7 @@ function renderFriction() {
       return h(
         'button',
         { type: 'button', class: 'chip' + (on ? ' on' : ''), 'aria-pressed': String(on), onclick: () => toggleDuration(m) },
-        m >= 60 ? `${m / 60} h` : `${m} min`
+        durationLabel(m)
       );
     })
   );
@@ -349,7 +354,7 @@ function toggleDuration(m) {
   const { durations } = state.settings;
   if (!durations.includes(m)) {
     if (durations.length >= MAX_DURATIONS) return toast(`Up to ${MAX_DURATIONS} options — remove one first`);
-    return saveSettings({ durations: [...durations, m].sort((a, b) => a - b) });
+    return saveSettings({ durations: sortDurations([...durations, m]) });
   }
   if (durations.length === 1) return toast('Keep at least one option');
   saveSettings({ durations: durations.filter((x) => x !== m) });
@@ -357,6 +362,45 @@ function toggleDuration(m) {
 
 function saveSettings(patch) {
   return set({ settings: { ...state.settings, ...patch } });
+}
+
+/* ---------- Appearance ---------- */
+
+function renderAppearance() {
+  const a = { ...DEFAULT_APPEARANCE, ...state.appearance };
+  const dark = document.documentElement.dataset.mode === 'dark';
+  $('themes').replaceChildren(
+    ...THEMES.map((t) => {
+      const [bg, accent] = dark ? t.dark : t.light;
+      return h(
+        'button',
+        {
+          type: 'button',
+          class: 'theme',
+          'aria-pressed': String(a.theme === t.id),
+          onclick: () => set({ appearance: { ...a, theme: t.id } }),
+        },
+        h(
+          'span',
+          { class: 'theme-preview', style: `--tbg:${bg};--tac:${accent}` },
+          h('i', { class: 'tp-bar' }),
+          h('i', { class: 'tp-line' }),
+          h('i', { class: 'tp-line short' }),
+          h('i', { class: 'tp-btn' })
+        ),
+        h('span', { class: 'theme-name' }, t.name, a.theme === t.id ? icon('check') : null)
+      );
+    })
+  );
+  $('modes').replaceChildren(
+    ...MODES.map((m) =>
+      h(
+        'button',
+        { type: 'button', 'aria-pressed': String(a.mode === m.id), onclick: () => set({ appearance: { ...a, mode: m.id } }) },
+        m.name
+      )
+    )
+  );
 }
 
 function wireFriction() {

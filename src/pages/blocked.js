@@ -1,8 +1,9 @@
-import { getState, set, onChange, send, todayKey } from '../lib/store.js';
+import { getState, set, onChange, send, todayKey, sortDurations, DAY } from '../lib/store.js';
 import { matchingPatterns, displayHost, isWebUrl } from '../lib/domains.js';
 import { isBlockingActive } from '../lib/rules.js';
 import { getProvider } from '../lib/embeds.js';
-import { h, icon, favicon, monogram, toast, plural, BRAND_MARK } from '../lib/ui.js';
+import { h, icon, toast, smooth, BRAND_MARK } from '../lib/ui.js';
+import { initLogos, siteLogo, appLogo } from '../lib/logos.js';
 import { mountTasks } from './tasks.js';
 
 const $ = (id) => document.getElementById(id);
@@ -45,7 +46,7 @@ async function init() {
     document.body.replaceChildren();
     return;
   }
-  state = await getState();
+  [state] = await Promise.all([getState(), initLogos()]);
   document.title = `${host} is blocked · Redirectory`;
   $('brand').innerHTML = BRAND_MARK + '<span>Redirectory</span>';
   $('preview-tag').hidden = !isPreview;
@@ -85,7 +86,7 @@ async function init() {
 function renderHero() {
   const chip = $('site-chip');
   chip.replaceChildren(
-    favicon(targetUrl || host),
+    siteLogo(targetUrl || host, { size: 'sm' }),
     h('span', { class: 'strike' }, host),
     h('span', { class: 'dot', title: 'Blocked' })
   );
@@ -122,8 +123,9 @@ async function closeTab() {
 
 function setupContinue() {
   const { settings } = state;
-  const durations = [...new Set(settings.durations)].filter((m) => m > 0).sort((a, b) => a - b);
-  selectedMinutes = durations[0] || 5; // shortest first: a nudge toward less
+  const durations = sortDurations(settings.durations.filter((m) => m === DAY || m > 0));
+  if (!durations.length) durations.push(5);
+  selectedMinutes = durations[0]; // shortest first: a nudge toward less
 
   const seg = $('durations');
   const renderDurations = () =>
@@ -140,7 +142,7 @@ function setupContinue() {
               updateButton();
             },
           },
-          m >= 60 ? `${m / 60} h` : `${m} min`
+          m === DAY ? 'Today' : m >= 60 ? `${m / 60} h` : `${m} min`
         )
       )
     );
@@ -164,7 +166,7 @@ function setupContinue() {
       }
       return;
     }
-    if (isPreview) return toast(`Preview: this would open ${host} for ${selectedMinutes} min.`);
+    if (isPreview) return toast(`Preview: this would open ${host} ${forLabel(selectedMinutes)}.`);
     const btn = $('continue-btn');
     btn.disabled = true;
     $('continue-label').textContent = 'Opening…';
@@ -175,7 +177,9 @@ function setupContinue() {
       updateButton();
       return;
     }
-    location.replace(targetUrl);
+    // Brief exit fade so the hand-off to the site feels deliberate, not abrupt.
+    document.body.classList.add('leaving');
+    setTimeout(() => location.replace(targetUrl), 160);
   });
 }
 
@@ -207,6 +211,11 @@ function startCountdown(seconds) {
   requestAnimationFrame(tick);
 }
 
+function forLabel(m) {
+  if (m === DAY) return 'for the rest of today';
+  return `for ${m >= 60 ? m / 60 + ' h' : m + ' min'}`;
+}
+
 function canContinue() {
   if (!countdownDone) return false;
   if (state.settings.requireReason && $('reason').value.trim().length < 3) return false;
@@ -218,7 +227,7 @@ function updateButton() {
   if (!countdownDone) return;
   btn.classList.add('ready');
   btn.disabled = state.settings.requireReason ? $('reason').value.trim().length < 3 : false;
-  $('continue-label').textContent = `Continue to ${host} for ${selectedMinutes >= 60 ? selectedMinutes / 60 + ' h' : selectedMinutes + ' min'}`;
+  $('continue-label').textContent = `Continue to ${host} ${forLabel(selectedMinutes)}`;
 }
 
 /* ---------- Stats ---------- */
@@ -289,7 +298,7 @@ function renderPanel() {
         h(
           'div',
           {},
-          h('span', { class: 'empty-icon' }, icon('layout')),
+          h('span', { class: 'empty-logos' }, ...['notion', 'todoist', 'ticktick', 'linear'].map((id) => appLogo(id, { size: 'lg' }))),
           h('h2', {}, 'Put your tasks here'),
           h('p', {}, 'Add Notion, Todoist, TickTick or any page you’d rather look at than a feed.'),
           h('a', { class: 'btn btn-primary', href: 'options.html#focus', target: '_blank' }, 'Set up focus panel')
@@ -311,12 +320,13 @@ function renderPanel() {
           role: 'tab',
           'aria-selected': String(e.id === active.id),
           onclick: () => {
+            if (state.activeEmbedId === e.id) return;
             state.activeEmbedId = e.id;
             if (!isPreview) set({ activeEmbedId: e.id });
-            renderPanel();
+            smooth(renderPanel);
           },
         },
-        monogram(e.label || p.name, p.color),
+        appLogo(e, { size: 'xs' }),
         e.label || p.name
       );
     })

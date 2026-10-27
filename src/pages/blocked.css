@@ -69,9 +69,8 @@ body {
   font-size: 13.5px;
   animation: rise 0.5s var(--ease) both;
 }
-.site-chip .favicon {
-  width: 26px;
-  height: 26px;
+.site-chip .logo {
+  --s: 26px;
   border-radius: 99px;
   box-shadow: none;
 }
@@ -281,11 +280,9 @@ h1 {
   color: var(--text);
   background: var(--surface-2);
 }
-.panel-tab .monogram {
-  width: 22px;
-  height: 22px;
+.panel-tab .logo {
+  --s: 20px;
   border-radius: 6px;
-  font-size: 10.5px;
 }
 .panel-tools {
   display: flex;
@@ -425,4 +422,18 @@ h1 {
   .panel {
     height: 78vh;
   }
+}
+
+.empty-logos {
+  display: inline-flex;
+  gap: 8px;
+}
+
+/* Exit fade when continuing to the site. */
+body {
+  transition: opacity 0.16s var(--ease), transform 0.16s var(--ease);
+}
+body.leaving {
+  opacity: 0;
+  transform: scale(0.995);
 }

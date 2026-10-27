@@ -2,8 +2,8 @@
   "manifest_version": 3,
   "name": "Redirectory",
   "short_name": "Redirectory",
-  "version": "1.0.0",
-  "description": "Block distracting sites and land on your task list instead. One click to continue when you really mean it.",
+  "version": "1.1.0",
+  "description": "Block distracting sites and land on your to-do list instead. Notion, Todoist and more right on the block page.",
   "minimum_chrome_version": "116",
   "icons": {
     "16": "src/assets/icons/icon-16.png",
@@ -29,7 +29,6 @@
     "storage",
     "alarms",
     "tabs",
-    "favicon",
     "contextMenus"
   ],
   "host_permissions": [
@@ -44,5 +43,20 @@
         "<all_urls>"
       ]
     }
-  ]
+  ],
+  "commands": {
+    "block-current-site": {
+      "suggested_key": {
+        "default": "Alt+Shift+B"
+      },
+      "description": "Block the site in the current tab"
+    },
+    "_execute_action": {
+      "suggested_key": {
+        "default": "Alt+Shift+R"
+      },
+      "description": "Open Redirectory"
+    }
+  },
+  "homepage_url": "https://github.com/tapariapurv/redirectory-chrome"
 }

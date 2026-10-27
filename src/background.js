@@ -1,5 +1,6 @@
-import { getState, set, update, onChange, todayKey, DEFAULTS } from './lib/store.js';
-import { buildRules, enforcedPatterns, nextExpiry, BLOCKED_PAGE } from './lib/rules.js';
+import { getState, get, set, update, onChange, todayKey, migrate } from './lib/store.js';
+import { fetchFavicon, isFresh, mergeCache } from './lib/favicon-fetch.js';
+import { buildRules, enforcedPatterns, nextExpiry, allowanceEnd, BLOCKED_PAGE } from './lib/rules.js';
 import { matchingPatterns, urlMatchesPattern, normalizePattern, isWebUrl } from './lib/domains.js';
 
 const EXPIRY_ALARM = 'expiry';
@@ -96,7 +97,7 @@ async function bumpStat(key) {
 async function allow(url, minutes) {
   const { sites } = await getState(['sites']);
   const patterns = matchingPatterns(url, sites.map((s) => s.pattern));
-  const until = Date.now() + Math.max(1, Math.min(240, Number(minutes) || 15)) * 60_000;
+  const until = allowanceEnd(minutes);
   await update('allowances', (a) => {
     for (const p of patterns) a[p] = until;
     return a;
@@ -132,7 +133,46 @@ const handlers = {
     await syncRules();
     return { ok: true };
   },
+  async favicons({ domains }) {
+    return { fetched: await fetchFavicons(domains) };
+  },
 };
+
+// Real site icons, fetched once and cached as data URLs (see favicon-fetch.js).
+const inFlight = new Set();
+async function fetchFavicons(domains = []) {
+  const cache = await get('favicons');
+  const todo = [...new Set(domains)]
+    .filter((d) => typeof d === 'string' && /^[a-z0-9.-]+$/.test(d) && d.includes('.'))
+    .filter((d) => !isFresh(cache[d]) && !inFlight.has(d))
+    .slice(0, 40);
+  if (!todo.length) return 0;
+  todo.forEach((d) => inFlight.add(d));
+  try {
+    const results = {};
+    await Promise.all(todo.map(async (d) => (results[d] = await fetchFavicon(d))));
+    await update('favicons', (c) => mergeCache(c, results));
+    return todo.length;
+  } finally {
+    todo.forEach((d) => inFlight.delete(d));
+  }
+}
+
+async function blockSite(target, tabId) {
+  let pattern = null;
+  try {
+    pattern = normalizePattern(new URL(target).hostname);
+  } catch {
+    return null;
+  }
+  if (!pattern) return null;
+  await update('sites', (sites) =>
+    sites.some((s) => s.pattern === pattern) ? sites : [{ pattern, addedAt: Date.now() }, ...sites]
+  );
+  await syncRules();
+  if (tabId != null) await enforceOpenTabs({ tabId });
+  return pattern;
+}
 
 chrome.runtime.onMessage.addListener((msg, _sender, respond) => {
   const fn = msg && handlers[msg.type];
@@ -151,10 +191,9 @@ onChange(RULE_KEYS, () => syncRules());
 
 chrome.runtime.onInstalled.addListener(async ({ reason }) => {
   // Fill in any keys a previous version didn't have, and clean bad patterns.
-  const state = await getState();
-  const fill = {};
   const raw = await chrome.storage.local.get(null);
-  for (const k of Object.keys(DEFAULTS)) if (!(k in raw)) fill[k] = state[k];
+  const fill = migrate(raw, reason);
+  const state = await getState();
   const cleaned = state.sites
     .map((s) => ({ ...s, pattern: normalizePattern(s.pattern) }))
     .filter((s) => s.pattern);
@@ -175,19 +214,14 @@ chrome.contextMenus?.removeAll(() => {
   });
 });
 
-chrome.contextMenus?.onClicked.addListener(async (info, tab) => {
+chrome.contextMenus?.onClicked.addListener((info, tab) => {
   if (info.menuItemId !== 'block-site') return;
-  const target = info.linkUrl || info.pageUrl;
-  let pattern = null;
-  try {
-    pattern = normalizePattern(new URL(target).hostname);
-  } catch {
-    return;
-  }
-  if (!pattern) return;
-  await update('sites', (sites) =>
-    sites.some((s) => s.pattern === pattern) ? sites : [...sites, { pattern, addedAt: Date.now() }]
-  );
-  await syncRules();
-  if (!info.linkUrl && tab && tab.id != null) await enforceOpenTabs({ tabId: tab.id });
+  blockSite(info.linkUrl || info.pageUrl, !info.linkUrl && tab ? tab.id : null);
+});
+
+// Alt+Shift+B (configurable at chrome://extensions/shortcuts) blocks the current site.
+chrome.commands?.onCommand.addListener(async (command, tab) => {
+  if (command !== 'block-current-site') return;
+  const active = tab || (await chrome.tabs.query({ active: true, currentWindow: true }))[0];
+  if (active && isWebUrl(active.url)) blockSite(active.url, active.id);
 });

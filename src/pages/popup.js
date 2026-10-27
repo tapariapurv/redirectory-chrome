@@ -3,7 +3,9 @@ import { normalizePattern, parsePatternList, matchingPatterns, splitPattern, isW
 import { isBlockingActive, activeAllowances } from '../lib/rules.js';
 import { PRESETS, presetState, togglePreset, getPreset } from '../lib/presets.js';
 import { addPatterns, removePatterns } from '../lib/sites.js';
-import { h, icon, favicon, toast, formatTime, formatRemaining, BRAND_MARK } from '../lib/ui.js';
+import { h, icon, toast, smooth, formatTime, formatRemaining, BRAND_MARK } from '../lib/ui.js';
+import { initLogos, siteLogo, logoStack } from '../lib/logos.js';
+import { endOfDay } from '../lib/store.js';
 
 const $ = (id) => document.getElementById(id);
 const LIST_LIMIT = 6;
@@ -19,12 +21,12 @@ async function init() {
   $('settings-link').append(icon('settings'), 'Settings');
 
   [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
-  state = await getState();
+  [state] = await Promise.all([getState(), initLogos()]);
   render();
 
   onChange(['sites', 'allowances', 'enabled', 'pausedUntil'], async () => {
     state = await getState();
-    render();
+    smooth(render);
   });
 
   $('add-form').addEventListener('submit', onAdd);
@@ -115,7 +117,7 @@ function renderCurrent() {
   if (!isWebUrl(url)) {
     el.className = 'current muted';
     el.replaceChildren(
-      h('span', { class: 'favicon' }, icon('shield')),
+      h('span', { class: 'logo lg is-globe' }, icon('shield')),
       h('div', { class: 'current-info' }, 'Open any website and block it from here in one click.')
     );
     return;
@@ -138,7 +140,7 @@ function renderCurrent() {
       'div',
       { class: 'current-state allowed' },
       h('span', { class: 'dot' }),
-      `Allowed · ${formatRemaining(allowedUntil - now)} left`
+      allowedUntil >= endOfDay(now) - 1000 ? 'Allowed for the rest of today' : `Allowed · ${formatRemaining(allowedUntil - now)} left`
     );
     action = h(
       'button',
@@ -159,7 +161,7 @@ function renderCurrent() {
 
   el.className = 'current';
   el.replaceChildren(
-    favicon(url),
+    siteLogo(url, { size: 'lg' }),
     h('div', { class: 'current-info' }, h('div', { class: 'current-host', title: hostname }, hostname), stateEl),
     action
   );
@@ -220,7 +222,7 @@ function renderPresets() {
             toast(enable ? `${p.name} blocked` : `${p.name} unblocked`, enable ? null : { label: 'Undo', run: () => set({ sites: before }) });
           },
         },
-        h('span', { class: 'preset-icon' }, icon(p.icon)),
+        logoStack(p.sites, { size: 'sm', max: 3 }),
         h('span', { class: 'preset-name' }, p.name),
         h('span', { class: 'preset-check' }, icon('check'))
       );
@@ -244,7 +246,7 @@ function renderSites() {
     return h(
       'li',
       { class: 'site' + (allowed.has(s.pattern) ? ' allowed' : '') },
-      favicon(host),
+      siteLogo(s.pattern, { size: 'sm' }),
       h('span', { class: 'site-name', title: s.pattern }, host, path ? h('span', { class: 'path' }, path) : null),
       preset ? h('span', { class: 'tag' }, preset.name.split(' ')[0]) : null,
       h(

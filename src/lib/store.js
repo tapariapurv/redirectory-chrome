@@ -4,7 +4,7 @@
 export const DEFAULT_SETTINGS = {
   waitSeconds: 10, // countdown before "Continue" unlocks; 0 = instant
   requireReason: false, // ask "what for?" before continuing
-  durations: [5, 15, 30], // minutes offered on the blocked page; shortest is pre-selected
+  durations: [5, 15, 30, 'day'], // minutes offered on the block page, or 'day' for the rest of today
   reblockOnExpiry: true, // send open tabs back to the block page when time is up
 };
 
@@ -19,7 +19,30 @@ export const DEFAULTS = {
   tasks: [],
   stats: {}, // { 'YYYY-MM-DD': { blocked, continued, backed } }
   onboarded: false,
+  appearance: { theme: 'ember', mode: 'system' },
+  favicons: {}, // { domain: { d: dataUrl | '', t: fetchedAt } }
+  schema: 2,
 };
+
+export const DAY = 'day';
+
+/** Local midnight at the end of the given day. */
+export function endOfDay(now = Date.now()) {
+  const d = new Date(now);
+  d.setHours(24, 0, 0, 0);
+  return d.getTime();
+}
+
+/** "5 min", "1 h", "today" — label for a duration option. */
+export function durationLabel(m) {
+  if (m === DAY) return 'Rest of today';
+  return m >= 60 ? `${m / 60} h` : `${m} min`;
+}
+
+/** Sort numeric durations ascending with 'day' last. */
+export function sortDurations(list) {
+  return [...new Set(list)].sort((a, b) => (a === DAY) - (b === DAY) || a - b);
+}
 
 export async function getState(keys = Object.keys(DEFAULTS)) {
   const raw = await chrome.storage.local.get(keys);
@@ -69,4 +92,21 @@ export function uid() {
 /** Ask the background worker to do something and wait for the answer. */
 export function send(type, payload = {}) {
   return chrome.runtime.sendMessage({ type, ...payload });
+}
+
+/**
+ * Storage changes needed when the extension installs or updates: fill keys a
+ * previous version didn't have, and run schema upgrades. Pure, for testing.
+ */
+export function migrate(raw, reason) {
+  const patch = {};
+  for (const k of Object.keys(DEFAULTS)) if (!(k in raw)) patch[k] = structuredClone(DEFAULTS[k]);
+  // v1 -> v2: offer "rest of today" to people who installed before it existed.
+  if (reason === 'update' && (raw.schema || 1) < 2) {
+    const settings = { ...DEFAULT_SETTINGS, ...(raw.settings || {}) };
+    const durations = settings.durations.includes(DAY) ? settings.durations : sortDurations([...settings.durations, DAY]);
+    patch.settings = { ...settings, durations: durations.slice(-5) };
+    patch.schema = 2;
+  }
+  return patch;
 }

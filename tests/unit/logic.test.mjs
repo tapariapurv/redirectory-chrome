@@ -11,6 +11,11 @@ import { buildRules, enforcedPatterns, nextExpiry, isBlockingActive, siteRule, F
 import { PRESETS, presetState, togglePreset } from '../../src/lib/presets.js';
 import { normalizeEmbedUrl, detectProvider, embedDomain, PROVIDERS } from '../../src/lib/embeds.js';
 import { addPatterns, removePatterns } from '../../src/lib/sites.js';
+import { migrate, endOfDay, sortDurations, durationLabel, DEFAULTS } from '../../src/lib/store.js';
+import { allowanceEnd } from '../../src/lib/rules.js';
+import { brandFor, brandStyle, BRANDS } from '../../src/lib/brands.js';
+import { fetchFavicon, faviconSources, isFresh, mergeCache, HIT_TTL, MISS_TTL } from '../../src/lib/favicon-fetch.js';
+import { existsSync } from 'node:fs';
 
 test('normalizePattern cleans up whatever people paste', () => {
   const cases = {
@@ -231,4 +236,105 @@ test('every non-builtin provider ships a usable default or placeholder', () => {
     if (p.url) assert.ok(normalizeEmbedUrl(p.url), p.id);
     assert.ok(p.placeholder, p.id);
   }
+});
+
+/* ---------- v1.1: rest of today, migration ---------- */
+
+test('allowanceEnd: minutes are clamped, "day" ends at local midnight', () => {
+  const now = new Date(2026, 9, 27, 14, 30).getTime();
+  assert.equal(allowanceEnd(15, now), now + 15 * 60_000);
+  assert.equal(allowanceEnd(9999, now), now + 240 * 60_000);
+  assert.equal(allowanceEnd('junk', now), now + 15 * 60_000);
+  assert.equal(allowanceEnd('day', now), new Date(2026, 9, 28, 0, 0).getTime());
+  assert.equal(endOfDay(new Date(2026, 9, 27, 23, 59).getTime()), new Date(2026, 9, 28).getTime());
+});
+
+test('durations sort with "day" last and read naturally', () => {
+  assert.deepEqual(sortDurations(['day', 30, 5, 15, 5]), [5, 15, 30, 'day']);
+  assert.equal(durationLabel('day'), 'Rest of today');
+  assert.equal(durationLabel(60), '1 h');
+  assert.equal(durationLabel(5), '5 min');
+});
+
+test('migrate: fresh install gets every default', () => {
+  const patch = migrate({}, 'install');
+  assert.deepEqual(Object.keys(patch).sort(), Object.keys(DEFAULTS).sort());
+  assert.ok(patch.settings.durations.includes('day'));
+});
+
+test('migrate: v1 users get "Rest of today" without losing their choices', () => {
+  const raw = { schema: undefined, sites: [{ pattern: 'x.com' }], settings: { waitSeconds: 30, durations: [1, 5] } };
+  const patch = migrate(raw, 'update');
+  assert.deepEqual(patch.settings.durations, [1, 5, 'day']);
+  assert.equal(patch.settings.waitSeconds, 30);
+  assert.equal(patch.schema, 2);
+  assert.ok(!('sites' in patch), 'existing data untouched');
+  assert.deepEqual(migrate({ ...raw, ...patch }, 'update').schema, undefined, 'idempotent');
+  // Already at five options: keep the five longest, "day" included.
+  assert.deepEqual(migrate({ settings: { durations: [1, 5, 10, 15, 30] } }, 'update').settings.durations, [5, 10, 15, 30, 'day']);
+});
+
+/* ---------- v1.1: logos ---------- */
+
+test('brandFor matches hosts, subdomains, patterns and URLs', () => {
+  assert.equal(brandFor('youtube.com').slug, 'youtube');
+  assert.equal(brandFor('m.youtube.com').slug, 'youtube');
+  assert.equal(brandFor('https://www.reddit.com/r/all').slug, 'reddit');
+  assert.equal(brandFor('twitter.com').slug, 'x');
+  assert.equal(brandFor('store.steampowered.com').slug, 'steam');
+  assert.equal(brandFor('news.ycombinator.com').slug, 'ycombinator');
+  assert.equal(brandFor('notyoutube.com'), null);
+  assert.equal(brandFor('youtube.com.evil.io'), null);
+  assert.equal(brandFor(''), null);
+});
+
+test('every brand has a bundled SVG and a sensible style', () => {
+  for (const [slug, b] of Object.entries(BRANDS)) {
+    assert.ok(existsSync(new URL(`../../src/assets/brands/${slug}.svg`, import.meta.url)), slug);
+    assert.match(b.hex, /^[0-9A-F]{6}$/i, slug);
+  }
+  assert.equal(brandStyle('000000').mode, 'ink', 'black marks follow the text colour');
+  assert.equal(brandStyle('FFFC00').mode, 'filled', 'yellow marks get a filled tile');
+  assert.deepEqual(brandStyle('FF0000'), { mode: 'color', fg: '#FF0000' });
+});
+
+test('every task-app provider shows a real logo', () => {
+  for (const p of PROVIDERS) {
+    if (p.builtin || p.id === 'custom' || p.id === 'mstodo') continue; // To Do: live favicon
+    assert.ok(brandFor(p.domain), p.id);
+  }
+});
+
+const res = (status, type, bytes) => ({
+  ok: status >= 200 && status < 300,
+  headers: { get: () => type },
+  arrayBuffer: async () => new Uint8Array(bytes).buffer,
+});
+
+test('fetchFavicon: first good image wins, 404 globes and junk are skipped', async () => {
+  const calls = [];
+  const fetchImpl = async (url) => {
+    calls.push(url);
+    if (url.includes('google')) return res(404, 'image/png', 200);
+    if (url.includes('duckduckgo')) return res(200, 'text/html', 500);
+    return res(200, 'image/x-icon', 300);
+  };
+  const d = await fetchFavicon('example.org', fetchImpl);
+  assert.match(d, /^data:image\/x-icon;base64,/);
+  assert.equal(calls.length, 3);
+  assert.deepEqual(calls, faviconSources('example.org'));
+  assert.equal(await fetchFavicon('none.org', async () => res(404, 'image/png', 10)), '');
+  assert.equal(await fetchFavicon('err.org', async () => { throw new Error('offline'); }), '');
+});
+
+test('favicon cache: freshness and size cap', () => {
+  const now = 1_000_000_000_000;
+  assert.ok(isFresh({ d: 'x', t: now - HIT_TTL + 1 }, now));
+  assert.ok(!isFresh({ d: 'x', t: now - HIT_TTL - 1 }, now));
+  assert.ok(isFresh({ d: '', t: now - MISS_TTL + 1 }, now));
+  assert.ok(!isFresh({ d: '', t: now - MISS_TTL - 1 }, now));
+  let cache = {};
+  for (let i = 0; i < 450; i++) cache = mergeCache(cache, { [`s${i}.com`]: 'd' }, now + i);
+  assert.equal(Object.keys(cache).length, 400);
+  assert.ok(!('s0.com' in cache) && 's449.com' in cache, 'oldest dropped first');
 });
