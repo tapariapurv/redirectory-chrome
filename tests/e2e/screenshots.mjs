@@ -77,4 +77,19 @@ for (const scheme of ['light', 'dark']) {
 
   await h.close();
 }
+// Block page in a few other themes, for the website's theme showcase.
+for (const [theme, mode] of [['ocean', 'dark'], ['grape', 'light'], ['forest', 'dark'], ['rose', 'light'], ['mono', 'dark']]) {
+  const h = await launch({ colorScheme: mode });
+  await h.storage({ ...seed, appearance: { theme, mode } });
+  await h.synced();
+  const page = await h.context.newPage();
+  await page.goto(h.site('www.reddit.com', '/r/all')).catch(() => {});
+  await page.locator('.task').first().waitFor();
+  await page.evaluate(() => {
+    document.getElementById('headline').textContent = 'Is this on purpose?';
+  });
+  await page.waitForTimeout(3500);
+  await page.screenshot({ path: path.join(out, `theme-${theme}-${mode}.png`) });
+  await h.close();
+}
 console.log('screenshots written to', out);

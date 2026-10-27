@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Redirectory — Block distracting sites. Land on your to-do list.</title>
+    <meta
+      name="description"
+      content="Redirectory is a free, open-source Chrome extension that blocks distracting websites like YouTube, Reddit and X, and shows your Notion, Todoist or built-in task list instead. Gentle friction, real focus."
+    />
+    <meta name="keywords" content="website blocker, chrome extension, block distracting sites, focus, productivity, notion, todoist, site blocker, block youtube, block reddit, doomscrolling" />
+    <link rel="canonical" href="https://tapariapurv.github.io/redirectory-chrome/" />
+    <meta name="theme-color" content="#f6f4f0" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e0f12" media="(prefers-color-scheme: dark)" />
+    <link rel="icon" href="assets/logo.svg" type="image/svg+xml" />
+    <link rel="icon" href="assets/favicon-32.png" sizes="32x32" type="image/png" />
+    <link rel="apple-touch-icon" href="assets/icon-128.png" />
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Redirectory" />
+    <meta property="og:title" content="Redirectory — Block distracting sites. Land on your to-do list." />
+    <meta property="og:description" content="A free Chrome extension that swaps YouTube, Reddit and X for your Notion, Todoist or built-in task list. Open source, private by design." />
+    <meta property="og:url" content="https://tapariapurv.github.io/redirectory-chrome/" />
+    <meta property="og:image" content="https://tapariapurv.github.io/redirectory-chrome/assets/og.png" />
+    <meta property="og:image:width" content="1280" />
+    <meta property="og:image:height" content="640" />
+    <meta property="og:image:alt" content="Redirectory's block page: a calm prompt on the left, your task list on the right." />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Redirectory — Block distracting sites. Land on your to-do list." />
+    <meta name="twitter:description" content="A free Chrome extension that swaps distracting sites for your task list." />
+    <meta name="twitter:image" content="https://tapariapurv.github.io/redirectory-chrome/assets/og.png" />
+
+    <link rel="preload" href="assets/inter.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="stylesheet" href="site.css" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "Redirectory",
+        "applicationCategory": "BrowserApplication",
+        "applicationSubCategory": "Productivity",
+        "operatingSystem": "Chrome, Edge, Brave, Arc (Chromium)",
+        "description": "Chrome extension that blocks distracting websites and shows your task list (Notion, Todoist, TickTick, Google Tasks or built-in) instead, with a gentle countdown before you can continue.",
+        "url": "https://tapariapurv.github.io/redirectory-chrome/",
+        "downloadUrl": "https://github.com/tapariapurv/redirectory-chrome",
+        "softwareVersion": "1.1.0",
+        "license": "https://opensource.org/licenses/MIT",
+        "image": "https://tapariapurv.github.io/redirectory-chrome/assets/og.png",
+        "offers": { "@type": "Offer", "price": "0", "priceCurrency": "USD" }
+      }
+    </script>
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Is Redirectory free?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. It is free and open source under the MIT license. There is no account, no subscription and no tracking." }
+          },
+          {
+            "@type": "Question",
+            "name": "Can I embed Notion or Todoist on the block page?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Yes. Redirectory can show Notion, Todoist, TickTick, Google Tasks, Google Calendar, Microsoft To Do, Linear, Asana, Trello, ClickUp or any URL next to the continue button. Sign in to the app in a normal tab once and it loads with your account." }
+          },
+          {
+            "@type": "Question",
+            "name": "What if I genuinely need a blocked site?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Wait out a short countdown (10 seconds by default), pick 5, 15 or 30 minutes or the rest of today, and the site opens. When the time is up, open tabs go back to the block page." }
+          },
+          {
+            "@type": "Question",
+            "name": "Does Redirectory collect my browsing data?",
+            "acceptedAnswer": { "@type": "Answer", "text": "No. Your block list, tasks and stats are stored only in your browser. The only network requests are for site icons that aren't bundled with the extension." }
+          },
+          {
+            "@type": "Question",
+            "name": "Which browsers does it work in?",
+            "acceptedAnswer": { "@type": "Answer", "text": "Chrome and other Chromium browsers that support Manifest V3 extensions, such as Edge, Brave and Arc." }
+          }
+        ]
+      }
+    </script>
+  </head>
+  <body>
+    <header class="nav" id="top">
+      <div class="wrap nav-inner">
+        <a class="brand" href="#top" aria-label="Redirectory home">
+          <img src="assets/logo.svg" alt="" width="28" height="28" />
+          <span>Redirectory</span>
+        </a>
+        <nav class="nav-links" aria-label="Main">
+          <a href="#features">Features</a>
+          <a href="#how">How it works</a>
+          <a href="#themes">Themes</a>
+          <a href="#faq">FAQ</a>
+          <a href="https://github.com/tapariapurv/redirectory-chrome" rel="noopener">GitHub</a>
+        </nav>
+        <a class="btn btn-primary btn-sm" href="#install">Get it free</a>
+      </div>
+    </header>
+
+    <main>
+      <!-- Hero -->
+      <section class="hero">
+        <div class="wrap hero-inner">
+          <p class="eyebrow reveal"><span class="dot"></span> Free Chrome extension · Open source</p>
+          <h1 class="reveal">Redirect the reflex.</h1>
+          <p class="lede reveal">
+            Redirectory blocks the sites that pull you off course and puts your to-do list in their place — Notion, Todoist or a
+            simple built-in list. Need the site anyway? Wait ten seconds and choose how long.
+          </p>
+          <div class="cta-row reveal">
+            <a class="btn btn-primary btn-lg" href="#install">
+              <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 4v11M7 10l5 5 5-5M5 20h14"/></svg>
+              Install free
+            </a>
+            <a class="btn btn-ghost btn-lg" href="https://github.com/tapariapurv/redirectory-chrome" rel="noopener">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M12 .5a11.5 11.5 0 0 0-3.64 22.41c.58.1.79-.25.79-.56v-2c-3.2.7-3.88-1.37-3.88-1.37-.52-1.33-1.28-1.69-1.28-1.69-1.05-.71.08-.7.08-.7 1.16.08 1.77 1.19 1.77 1.19 1.03 1.77 2.7 1.26 3.36.96.1-.75.4-1.26.73-1.55-2.56-.29-5.25-1.28-5.25-5.69 0-1.26.45-2.29 1.19-3.1-.12-.29-.52-1.46.11-3.05 0 0 .97-.31 3.17 1.18a11 11 0 0 1 5.77 0c2.2-1.49 3.17-1.18 3.17-1.18.63 1.59.23 2.76.11 3.05.74.81 1.19 1.84 1.19 3.1 0 4.42-2.7 5.39-5.26 5.68.41.36.78 1.06.78 2.14v3.17c0 .31.21.67.8.56A11.5 11.5 0 0 0 12 .5Z"/></svg>
+              View source
+            </a>
+          </div>
+          <p class="fine reveal">No account. No tracking. Works in Chrome, Edge, Brave and Arc.</p>
+        </div>
+
+        <div class="wrap">
+          <figure class="shot hero-shot reveal">
+            <div class="shot-bar" aria-hidden="true"><i></i><i></i><i></i><span>youtube.com</span></div>
+            <picture>
+              <source srcset="screenshots/blocked-narrow-dark.png" media="(max-width: 600px) and (prefers-color-scheme: dark)" />
+              <source srcset="screenshots/blocked-narrow-light.png" media="(max-width: 600px)" />
+              <source srcset="screenshots/blocked-dark.png" media="(prefers-color-scheme: dark)" />
+              <img src="screenshots/blocked-light.png" width="1440" height="900" alt="Redirectory block page for youtube.com: 'Is this on purpose?', a Back to work button, a gated continue button, and a task list on the right." fetchpriority="high" />
+            </picture>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Logos -->
+      <section class="apps">
+        <div class="wrap">
+          <p class="apps-title">Your task app, right where the distraction was</p>
+          <ul class="logo-row" aria-label="Supported task apps">
+            <li><span class="mark" style="--m: url(assets/brands/notion.svg)" data-ink></span>Notion</li>
+            <li><span class="mark" style="--m: url(assets/brands/todoist.svg); --c: #e44332"></span>Todoist</li>
+            <li><span class="mark" style="--m: url(assets/brands/ticktick.svg); --c: #4772fa"></span>TickTick</li>
+            <li><span class="mark" style="--m: url(assets/brands/googletasks.svg); --c: #2684fc"></span>Google Tasks</li>
+            <li><span class="mark" style="--m: url(assets/brands/googlecalendar.svg); --c: #4285f4"></span>Google Calendar</li>
+            <li><span class="mark" style="--m: url(assets/brands/linear.svg); --c: #5e6ad2"></span>Linear</li>
+            <li><span class="mark" style="--m: url(assets/brands/asana.svg); --c: #f06a6a"></span>Asana</li>
+            <li><span class="mark" style="--m: url(assets/brands/trello.svg); --c: #0052cc"></span>Trello</li>
+            <li><span class="mark" style="--m: url(assets/brands/clickup.svg); --c: #7b68ee"></span>ClickUp</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Features -->
+      <section class="section" id="features">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <p class="kicker">Features</p>
+            <h2>Built for the moment your hand moves on its own.</h2>
+            <p>Most blockers are a wall you learn to climb. Redirectory is a speed bump with a better destination.</p>
+          </div>
+          <div class="features">
+            <article class="feature reveal">
+              <div class="f-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m5.6 5.6 12.8 12.8"/></svg></div>
+              <h3>Block anything, precisely</h3>
+              <p>Type <code>youtube.com</code> to block it and every subdomain, or <code>reddit.com/r/all</code> to block just the feed. Paste a whole list at once.</p>
+            </article>
+            <article class="feature reveal">
+              <div class="f-icon"><svg viewBox="0 0 24 24"><path d="M9 6h11M9 12h11M9 18h11"/><path d="m3.5 6 1 1 2-2M3.5 12l1 1 2-2M3.5 18l1 1 2-2"/></svg></div>
+              <h3>Your tasks, not a wall</h3>
+              <p>The block page shows Notion, Todoist, TickTick, Google Tasks — or a built-in list. The thing you should be doing is one click away.</p>
+            </article>
+            <article class="feature reveal">
+              <div class="f-icon"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>
+              <h3>Friction that actually works</h3>
+              <p>Continue unlocks after a short countdown that only runs while you're looking. Optionally name why you're going. Often, that's enough.</p>
+            </article>
+            <article class="feature reveal">
+              <div class="f-icon"><svg viewBox="0 0 24 24"><path d="M12 3v2M12 19v2M5 12H3M21 12h-2M6.3 6.3 4.9 4.9M19.1 19.1l-1.4-1.4M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"/><circle cx="12" cy="12" r="4"/></svg></div>
+              <h3>5 minutes, or the rest of today</h3>
+              <p>Pick how long you need. When time's up, open tabs return to the block page. The door closes itself.</p>
+            </article>
+            <article class="feature reveal">
+              <div class="f-icon"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h16M4 18h10"/></svg></div>
+              <h3>One-click lists</h3>
+              <p>Social media, doomscrolling, video, news, shopping, games. Switch a whole category on with one click, or block the current tab with <kbd>Alt</kbd>+<kbd>Shift</kbd>+<kbd>B</kbd>.</p>
+            </article>
+            <article class="feature reveal">
+              <div class="f-icon"><svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 3 8.3 7 9.5 4-1.2 7-5 7-9.5V6l-7-3Z"/></svg></div>
+              <h3>Private by design</h3>
+              <p>No account, no servers, no analytics. Your list, tasks and stats never leave your browser. The code is open for anyone to read.</p>
+            </article>
+          </div>
+        </div>
+      </section>
+
+      <!-- How it works -->
+      <section class="section how" id="how">
+        <div class="wrap how-inner">
+          <div class="how-copy">
+            <div class="section-head left reveal">
+              <p class="kicker">How it works</p>
+              <h2>Thirty seconds to set up. Then it just works.</h2>
+            </div>
+            <ol class="steps">
+              <li class="reveal">
+                <b>Pick what pulls you away.</b>
+                <span>Add sites one by one, or switch on a quick list like Social media or Doomscrolling.</span>
+              </li>
+              <li class="reveal">
+                <b>Choose your focus panel.</b>
+                <span>Paste a Notion page or Todoist view — or keep the built-in list. It shows up every time you're redirected.</span>
+              </li>
+              <li class="reveal">
+                <b>Get back to it.</b>
+                <span>Next time you reach for a feed, you land on your list. Turn back, or wait and continue on your terms.</span>
+              </li>
+            </ol>
+            <div class="distractions reveal" aria-label="Sites people commonly block">
+              <span class="mark" style="--m: url(assets/brands/youtube.svg); --c: #ff0000"></span>
+              <span class="mark" style="--m: url(assets/brands/x.svg)" data-ink></span>
+              <span class="mark" style="--m: url(assets/brands/reddit.svg); --c: #ff4500"></span>
+              <span class="mark" style="--m: url(assets/brands/instagram.svg); --c: #ff0069"></span>
+              <span class="mark" style="--m: url(assets/brands/tiktok.svg)" data-ink></span>
+              <span class="mark" style="--m: url(assets/brands/netflix.svg); --c: #e50914"></span>
+              <span class="mark" style="--m: url(assets/brands/twitch.svg); --c: #9146ff"></span>
+              <span class="mark" style="--m: url(assets/brands/facebook.svg); --c: #0866ff"></span>
+              <span class="mark" style="--m: url(assets/brands/ycombinator.svg); --c: #f0652f"></span>
+              <span class="more">and anything else</span>
+            </div>
+          </div>
+          <figure class="shot popup-shot reveal">
+            <picture>
+              <source srcset="screenshots/popup-dark.png" media="(prefers-color-scheme: dark)" />
+              <img src="screenshots/popup-light.png" width="372" height="600" alt="Redirectory toolbar popup with quick lists and blocked sites, each shown with its real logo." loading="lazy" />
+            </picture>
+          </figure>
+        </div>
+      </section>
+
+      <!-- Themes -->
+      <section class="section" id="themes">
+        <div class="wrap">
+          <div class="section-head reveal">
+            <p class="kicker">Themes</p>
+            <h2>Six themes. Light, dark, or follow your system.</h2>
+            <p>Pick one below to see it.</p>
+          </div>
+          <div class="theme-picker reveal" role="tablist" aria-label="Themes">
+            <button role="tab" data-shot="screenshots/theme-ocean-dark.png" style="--sw: #5b8cff" aria-selected="true">Ocean</button>
+            <button role="tab" data-shot="screenshots/theme-grape-light.png" style="--sw: #7046e6">Grape</button>
+            <button role="tab" data-shot="screenshots/theme-forest-dark.png" style="--sw: #45d08e">Forest</button>
+            <button role="tab" data-shot="screenshots/theme-rose-light.png" style="--sw: #d92f5a">Rose</button>
+            <button role="tab" data-shot="screenshots/theme-mono-dark.png" style="--sw: #8e8e93">Mono</button>
+            <button role="tab" data-shot="screenshots/blocked-light.png" style="--sw: #e8552c">Ember</button>
+          </div>
+          <figure class="shot theme-shot reveal">
+            <img id="theme-img" src="screenshots/theme-ocean-dark.png" width="1440" height="900" alt="Redirectory block page in the selected theme." loading="lazy" />
+          </figure>
+        </div>
+      </section>
+
+      <!-- Install -->
+      <section class="section install" id="install">
+        <div class="wrap install-inner reveal">
+          <div>
+            <p class="kicker">Install</p>
+            <h2>Get Redirectory in two minutes.</h2>
+            <ol class="install-steps">
+              <li>
+                <a href="https://github.com/tapariapurv/redirectory-chrome/archive/refs/heads/main.zip">Download the ZIP</a> and unzip it.
+              </li>
+              <li>Open <code>chrome://extensions</code> and switch on <b>Developer mode</b>.</li>
+              <li>Click <b>Load unpacked</b> and pick the unzipped folder.</li>
+              <li>Pin Redirectory to your toolbar. Settings open automatically.</li>
+            </ol>
+          </div>
+          <div class="install-card">
+            <img src="assets/logo.svg" alt="" width="56" height="56" />
+            <b>Redirectory 1.1</b>
+            <span>Free · MIT licensed · 0 trackers</span>
+            <a class="btn btn-primary btn-block" href="https://github.com/tapariapurv/redirectory-chrome/archive/refs/heads/main.zip">Download ZIP</a>
+            <a class="btn btn-ghost btn-block" href="https://github.com/tapariapurv/redirectory-chrome" rel="noopener">Star on GitHub</a>
+          </div>
+        </div>
+      </section>
+
+      <!-- FAQ -->
+      <section class="section" id="faq">
+        <div class="wrap narrow">
+          <div class="section-head reveal">
+            <p class="kicker">FAQ</p>
+            <h2>Questions, answered.</h2>
+          </div>
+          <div class="faq">
+            <details class="reveal">
+              <summary>Is it really free?</summary>
+              <p>Yes. Redirectory is open source under the MIT license. There's no account, subscription or upsell.</p>
+            </details>
+            <details class="reveal">
+              <summary>How do Notion and Todoist show up on the block page?</summary>
+              <p>
+                Most task apps refuse to load inside other pages. Redirectory lifts that restriction only for frames inside its own block
+                page — nowhere else on the web. Sign in to the app in a normal tab once, and it loads with your account.
+              </p>
+            </details>
+            <details class="reveal">
+              <summary>What if I actually need the site?</summary>
+              <p>
+                Wait out the countdown (10 seconds by default), choose 5, 15 or 30 minutes or the rest of today, and you're through. When
+                time's up, open tabs on that site return to the block page.
+              </p>
+            </details>
+            <details class="reveal">
+              <summary>Can I take a break from blocking?</summary>
+              <p>Pause for 15 minutes, an hour or the rest of the day from the toolbar. Blocking turns itself back on — no need to remember.</p>
+            </details>
+            <details class="reveal">
+              <summary>Does it track me?</summary>
+              <p>
+                No. Everything is stored locally in your browser. The only network requests fetch icons for sites that don't have a logo
+                bundled with the extension. Read the <a href="privacy.html">privacy policy</a>.
+              </p>
+            </details>
+            <details class="reveal">
+              <summary>Which browsers are supported?</summary>
+              <p>Chrome and other Chromium browsers with Manifest V3 support: Edge, Brave, Arc, Vivaldi and Opera.</p>
+            </details>
+          </div>
+        </div>
+      </section>
+
+      <section class="final">
+        <div class="wrap final-inner reveal">
+          <h2>Your attention is the work.<br />Protect it.</h2>
+          <a class="btn btn-primary btn-lg" href="#install">Get Redirectory — free</a>
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="wrap footer-inner">
+        <a class="brand" href="#top"><img src="assets/logo.svg" alt="" width="22" height="22" /><span>Redirectory</span></a>
+        <nav aria-label="Footer">
+          <a href="https://github.com/tapariapurv/redirectory-chrome" rel="noopener">GitHub</a>
+          <a href="privacy.html">Privacy</a>
+          <a href="https://github.com/tapariapurv/redirectory-chrome/issues" rel="noopener">Report an issue</a>
+          <a href="https://github.com/tapariapurv/redirectory-chrome/blob/main/LICENSE" rel="noopener">MIT License</a>
+        </nav>
+        <p class="legal">Brand logos are trademarks of their owners and are shown only to identify supported apps.</p>
+      </div>
+    </footer>
+    <script src="site.js" defer></script>
+  </body>
+</html>

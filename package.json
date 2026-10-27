@@ -1,8 +1,8 @@
 {
   "name": "redirectory",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "private": true,
-  "description": "Chrome extension: block distracting sites and land on your task list instead.",
+  "description": "Chrome extension that blocks distracting sites and shows your Notion, Todoist or built-in to-do list instead.",
   "type": "module",
   "scripts": {
     "test": "node --test \"tests/unit/*.test.mjs\"",
@@ -10,9 +10,31 @@
     "test:all": "npm test && npm run test:e2e",
     "screenshots": "node tests/e2e/screenshots.mjs",
     "icons": "node tools/make-icons.mjs",
-    "package": "node tools/package.mjs"
+    "package": "node tools/package.mjs",
+    "og": "node tools/make-og.mjs"
   },
   "devDependencies": {
     "playwright": "^1.50.0"
-  }
+  },
+  "homepage": "https://tapariapurv.github.io/redirectory-chrome/",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tapariapurv/redirectory-chrome.git"
+  },
+  "bugs": {
+    "url": "https://github.com/tapariapurv/redirectory-chrome/issues"
+  },
+  "license": "MIT",
+  "keywords": [
+    "chrome-extension",
+    "website-blocker",
+    "site-blocker",
+    "productivity",
+    "focus",
+    "distraction-blocker",
+    "notion",
+    "todoist",
+    "manifest-v3",
+    "doomscrolling"
+  ]
 }

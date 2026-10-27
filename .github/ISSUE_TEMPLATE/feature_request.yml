@@ -1,0 +1,12 @@
+name: Feature request
+description: Suggest an idea
+labels: [enhancement]
+body:
+  - type: textarea
+    attributes:
+      label: What would you like Redirectory to do?
+    validations:
+      required: true
+  - type: textarea
+    attributes:
+      label: Why? What are you trying to get done?
